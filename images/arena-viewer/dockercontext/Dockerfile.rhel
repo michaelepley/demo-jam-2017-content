@@ -7,6 +7,8 @@ LABEL version="0.1"
 LABEL description="JRobots Arena Viewer"
 ENV WMCTRL_RPM=wmctrl-1.07-15.el7.nux.x86_64.rpm
 
+USER 0
+
 WORKDIR /tmp/
 ADD resources/ /resources/
 
