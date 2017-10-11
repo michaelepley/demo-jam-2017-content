@@ -1,0 +1,256 @@
+
+Proposal for a new selection strategy for Jrobots challenges
+------------------------------------------------------------
+Excerpt from three emails of Alan Lund < alan.lund @ acm.org >
+(aka "Zeke" - author of "IonStorm")
+
+[First Post]
+
+I hate to say it, but I'm pretty sure there's a problem with the
+"Near" [or "Bubble-sorting"] selection algorithm...
+I've been thinking about how it should work out, and finally wrote
+a little simulation, with five robots, A through E.
+
+Here is a table with the simulated winning percentages of each pair.
+
+     vs  A      B      C      D      E
+  A      -     70     75     80     90
+  B     30      -     60     65     80
+  C     25     40      -     52     80
+  D     20     35     48      -     80
+  E     10     20     20     20      -
+
+So A is the strongest (by far), B next, C next (barely), D next,
+and E last (by far).
+
+I ran a simulated 4000 combats several times, which is
+proportionately much higher than what the real arena would see.
+
+Here are some results:
+  a   0.7302371542
+  c   0.511662531
+  b   0.5114541833
+  d   0.5111336032
+  e   0.1951466127
+
+  a   0.7329490874
+  d   0.51017294
+  b   0.5099403579
+  c   0.5094243505
+  e   0.2043222004
+
+  a   0.7064128257
+  b   0.517611026
+  c   0.5165923725
+  d   0.5160811479
+  e   0.1944167498
+
+  a   0.7388781431
+  c   0.5084409136
+  b   0.5077772203
+  d   0.505758638
+  e   0.1975051975
+
+Basically, the presence of a very strong A and a very weak E act as
+mixers.  Whoever is in second (or second to last) very quickly wins
+(or loses) enough to move back toward the middle.  A ends up with a
+winning percentage between it's percentage vs B and C... running the
+simulation longer gets it very close.  Similarly for E: it ends up
+with a percentage approximately equal to the best it does vs C and D.
+
+B, C and D end up in the middle, all very close together (usually
+within 0.1%!), and their order is not particularly related to their
+relative strengths.  In the four samples above we see CBD, DBC, BCD,
+and CBD (again).
+
+Now, the real mix of winning percentages is not going to be so nice,
+but I'm pretty sure that what is going to happen is that if there is a
+robot that beats each opponent more than 50% of the time, its
+winning percentage will tend toward the average of the winning
+percentages it has versus the top few remaining robots.  Which one of
+those robots gets second place is a question of when the tournament
+ends.  The second best robot (B) has a better probability of ending up
+second, but it's really a matter of luck.  And it doesn't matter if
+you run the tournament longer.  In some ways, that just guarantees
+that the middle few will converge to the middle and that the last few
+combats will decide the final placement.
+
+I am sure there are lots of other things that could be examined,
+including things like A beats B, B beats C, C beats A, or that no
+robot beats all others more than 50% of the time. But as it happens,
+IonStorm (in my tests) does beat each of the other robots at least 70%
+of the time (in Single play). So, I expect that a true bubble sort
+selection algorithm would clearly (and fairly) show IonStorm on top,
+but the remaining places would be somewhat questionable, and the
+situation would get worse as time went on...
+
+Now, I started this message by mentioning that I don't think the
+selection algorithm is working quite right.  Given the above, that
+might not be so bad.  Mixing up the opponents, but giving preference
+to those near, should help maintain a more representative ordering.
+
+In any case, I do agree that there should be some way to distinguish
+among the top few robots better, but I'm not sure yet what that should
+be. I do think that a good starting point would be to use random
+selection and keep a record of each individual match. Then you could
+do some more detailed reporting.
+
+For instance, maybe you could do the rating in two passes.  First, you
+rank all the robots using their overall win percentages.  Then, rank
+them again using their win percentages vs. the top five other robots,
+or the top 25%, or whatever.  (Team mode would be more complicated.)
+
+That's just one idea.  But recording the results of individual matches
+would allow you to play with some of those kinds of things without
+having to re-run the entire tournament.  It would also provide some
+helpful debugging information when the selection algorithm is not
+working as planned (so we could find out, for instance, who IonStorm
+is fighting that isn't KillerBees).
+
+[Second Post]
+
+I've been working on evaluating different selection strategies, and I
+have a proposal.
+
+The method I used was to write a simulation in which seven robots did
+combat.  Each robot had a particular probability of winning against
+each other robot; different opponents had different probabilities.
+In general, there was not an "obvious" order... for instance, A beats
+B, B beats C, C beats A, and that sort of thing.
+
+I took the ideal ranking of the robots to be what would be obtained
+after a large number of combats in which each pair was chosen an equal
+number of times.  This just reduces to taking the average of each
+robot's per-opponent winning percentage.
+
+So given a defined "best" ranking, I evaluated different selection
+strategies based on how quickly and reliably they reproduced the
+correct ordering.  (The simulated combats are just random numbers
+evaluated against the winning percentage of one robot over the other.)
+
+I evaluated purely random pairings as JRobots does now in Random mode,
+which I'll call RANDOM and five other selection strategies, all of
+which were variations on a weighted selection.
+
+Four of the others were really the same algorithm, just with different
+values for one parameter.  The algorithm is
+  1. Pick one robot (Ri) at random (0 <= i < N)
+  2. Calculate the difference in overall winning percentage between Ri
+     and for each other robot Rj, 0 <= j < N, j <> i.  Call these
+     differences Dj.  0 <= Dj <= 1 for each j <> i;
+  3. Calculate "weights" for each robot.  Wj = 1 - Dj^P, where ^ is
+     exponentiation and P is the parameter I mentioned earlier.
+     0 < P <= 1.  (Actually P could be greater than 1, but I didn't
+     try any such values.)  Wj is greater when Dj is smaller, so Wj
+     increases as the winning percentage of Rj gets closer to that
+     of Ri.  Due to the way that Dj^P looks for 0 <= Dj <= 1, smaller
+     values of P correspond to "narrower" selections... that is nearer
+     robots get chosen more often.
+  4. Choose an opponent Rk with probability Wk / sum(Wj).  (Or in team
+     mode, choose three opponents.)
+
+As I said, I tried four values for P: 0.25, 0.3333, 0.5 and 1.0.  Call
+these WEIGHTED(0.25), ... WEIGHTED(1.0).
+
+The last strategy I tried was too increase the probability of a robot
+being chosen (in step 1 above) based on how close it was to its
+nearest neighbor in overall winning percentage.  The idea there was
+that allocating more combats to robots that are close together would
+disambiguate the ranking more quickly.  Call this one GOOFY.  (Sorry,
+I can't think of a good name... it won't matter.)
+
+In the end, WEIGHTED(1.0) performed the best. In simulated tournaments
+of about 6000 simulated combats, that selection strategy yielded the
+correct ordering about 70% of the time. RANDOM produced about 45%
+correct values. WEIGHTED(0.5) was also about 70% accurate, but was
+less accurate for smaller numbers of combats than WEIGHTED(1.0) was.
+WEIGHTED(0.3333) and WEIGHTED(0.25) finished at about 68% and 61%
+respectively.  GOOFY finished at a terrible 44%, about the same as
+RANDOM, but looking at the graph of success rate vs. number of
+combats, it was barely improving with more combats, and was never
+competitive with any of the WEIGHTED strategies.
+
+Assuming the results aren't too specific to the test data I used, it
+appears that using WEIGHTED(1.0) or even WEIGHTED(0.5) would result in
+approximately a 50% increase in "efficiency" (70 / 45 = 1.56).
+
+It's also depressing to see how _many_ combats are required: 6000 just
+to get a 70% chance of being right, and further combats improve the
+percentage more and more slowly.  I'd guess that the number of
+required combats goes up at least linearly and quite possibly as the
+square of the number of robots.
+
+Of course, that is all evaluating the selection strategies on getting
+the entire ranking correct.  An alternative would be to put more
+emphasis on just getting the top 6, or the top 25% or top 50% correct.
+This would correspond to modifying Step 1 of the algorithm above to
+give the chosen few a better chance of getting selected.
+
+[Third and last post]
+
+I modified the second half of initArena(), replacing the old "near"
+selection with the weighted selection. I also added two private helper
+methods, magnifyUserSelections() and weightedSelection(). I tried to
+comment rather thoroughly.
+
+As you read through it, you will see three parameters that you could
+adjust: "floor", "threshhold" and "p".  "floor" and "threshhold" are
+used to compute a value for "c", which was one of two parameters I
+mentioned previously.
+
+"floor" is basically the lower limit for "c".  I set it to 0.05.
+
+"threshhold" provides some control over how quickly the selection of
+the first robot goes from mostly random to biased.  Higher values of
+"threshhold" result in a slower transition.  I made this 5 times the
+number of robots in the tournament.
+
+"p" is used to control how heavily the selection of additional robots
+is biased towards those with a winning percentage near that of the
+first robot.  Smaller values of "p" produce a higher bias.  Larger
+values produce a more even selection.  I set this to 1.0, which was
+the value that worked best in my simulations.
+
+The algorithm does correctly handle the cases where the user has
+chosen one or more robots in the list. Robots are picked
+preferentially from the selected items, and then from the unselected
+items if necessary.
+
+I ran several thousand single and team matches, and the match
+distribution seems reasonable.
+
+It may shift percentages downward, since the best robots get a
+disproportionate number of matches (meaning that others will be beaten
+more than usual).  You may want to consider whether or not to adjust
+the 50/50/25 rule based on this effect.
+
+For instance, I got the following results for fourteen robots in
+Singles matches (run at 4X if matters):
+
+  Robot                Wins  Matches   Win %
+  ------------------------------------------
+  IonStorm             620     660     93.9
+  KillerBees           570     707     80.6
+  Myst                 356     601     59.2
+  IlTristoSmorzatore   339     584     58.0
+  Fish                 237     524     45.2
+  NeoMonty             230     525     43.8
+  LvRDumber            206     473     43.6
+  Pulse1               215     530     40.6
+  MontyZ               168     434     38.7
+  Marvin3              175     481     36.4
+  Epa1                 137     446     30.7
+  Firetron             124     412     30.1
+  Jimbo                 58     305     19.0
+  bdj1                  19     226      8.4
+
+You can see that the best robots got about three times as many matches
+as the worst one, and that 10 of 14 ended up below 50%, but only 6
+ended up below 40%.
+
+[To read the code, go to the downloads section http://jrobots.sourceforge.net/downloads.shtml ,
+download the source code of the simulator of
+Jrobots and open the file JJArena.java]
+
+For comments on the proposal, send an email to
+Leonardo Boselli aka "Leo" < boselli @ uno.it >
