@@ -7,6 +7,11 @@ LABEL version="0.1"
 LABEL description="JRobots Arena Viewer"
 ENV WMCTRL_RPM=wmctrl-1.07-15.el7.nux.x86_64.rpm
 
+RUN subscription-manager repos --disable="*" \
+    && subscription-manager repos --enable=rhel-7-server-rpms --enable=rhel-7-server-optional-rpms --enable=rhel-7-server-supplementary-rpms --enable=rhel-7-server-extras-rpms \
+    && rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release \
+    && yum -y localinstall resources/epel-release-latest-7.noarch.rpm
+
 RUN yum clean all && yum install -y deltarpm && yum clean all \
     && yum -y install tigervnc-server gtk2 java-1.8.0-openjdk-devel liberation-fonts-common liberation-sans-fonts libguac-client-vnc guacd openbox guacamole \
     && yum clean all
