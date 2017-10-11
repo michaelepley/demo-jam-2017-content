@@ -8,11 +8,7 @@ LABEL description="JRobots Arena Viewer"
 ENV WMCTRL_RPM=wmctrl-1.07-15.el7.nux.x86_64.rpm
 
 WORKDIR /tmp/
-ADD resources/ resources/
-
-# setup subscription and then required packages
-USER 0
-RUN /resources/setup-subscription.sh
+ADD resources/ /resources/
 
 # install the required packages and other components
 RUN yum clean all && yum install -y deltarpm && yum clean all \
@@ -21,7 +17,7 @@ RUN yum clean all && yum install -y deltarpm && yum clean all \
 # install wmctrl since not in EPEL or standard channels
 # make sure that tomcat and guacd do not auto-start at boot
 # update the user-mapping.xml file for guacamole
-RUN curl ftp://ftp.pbone.net/mirror/li.nux.ro/download/nux/dextop/el7/x86_64/$WMCTRL_RPM -o resources/$WMCTRL_RPM \
-    && yum -y localinstall resources/$WMCTRL_RPM \
+RUN curl ftp://ftp.pbone.net/mirror/li.nux.ro/download/nux/dextop/el7/x86_64/$WMCTRL_RPM -o /tmp/$WMCTRL_RPM \
+    && yum -y localinstall /tmp/$WMCTRL_RPM \
     && systemctl disable tomcat && systemctl disable guacd \
-    && cp resources/user-mapping.xml /etc/guacamole 
+    && cp /resources/user-mapping.xml /etc/guacamole 
