@@ -1,23 +1,17 @@
 #!/bin/bash
 
+echo "Sets up VNC"
 echo "	--> setup the Xvnc password"
 mkdir -p ~/.vnc && echo "VNCPASS" | vncpasswd -f > ~/.vnc/passwd && chmod 600 ~/.vnc/passwd && chmod 740 ~/.vnc
 
 # create the xstartup file for Xvnc
-cat > ~/.vnc/xstartup <<EOF1
-openbox-session &
-EOF1
+echo 'openbox-session &' > ~/.vnc/xstartup
 
 chmod a+x ~/.vnc/xstartup
 
-# set openbox to launch JBDS at startup
-mkdir -p ~/.config/openbox ~/workspace
+mkdir -p ~/.config/openbox
 
-cat > ~/.config/openbox/environment <<EOF2
-export DISPLAY=:1
-EOF2
-
-cat > ~/.config/openbox/autostart <<EOF3
-/usr/share/jbdevstudio/jbdevstudio -nosplash -data $HOME/workspace &
-EOF3
+echo 'export DISPLAY=:1'  > ~/.config/openbox/environment
+# set openbox to launch the normal java s2i entrypoint at startup
+echo '/opt/s2i-java/run-java.sh &' > ~/.config/openbox/autostart
 

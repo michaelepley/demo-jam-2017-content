@@ -10,10 +10,7 @@ SCREEN_SIZE="1440x726"
 
 # waits until desired window, with name in $1, is active
 function wait_for_window {
-    while [ "x`DISPLAY=:1 wmctrl -l | grep "$1"`" = "x" ]
-    do
-        sleep 2
-    done
+	while [ "x`DISPLAY=:1 wmctrl -l | grep "$1"`" = "x" ] ; do sleep 2; done
 }
 
 # trap signals so we can close cleanly
@@ -37,7 +34,7 @@ fi
 
 # create all needed directories
 cd $HOME
-mkdir -p workspace .vnc
+mkdir -p .vnc
 
 # set vnc config if missing
 cd .vnc
@@ -52,16 +49,14 @@ fi
 
 echo "Screen resolution set to $SCREEN_SIZE"
 
-echo "Launching  Xvnc which launches openbox and JBDS ..."
+echo "Launching  Xvnc which launches openbox and applet ..."
 cd ..
 vncserver :1 -name 'Desktop Name' -geometry $SCREEN_SIZE -depth 24
 
 echo "Making application fullscreen ..."
-dummy=$(wait_for_window ' - Red Hat JBoss Developer Studio' && :)
-jbdswin=`DISPLAY=:1 wmctrl -l | \
-    grep 'Applet viewer' | \
-    cut -d' ' -f1`
-DISPLAY=:1 wmctrl -i -r $jbdswin -b add,fullscreen
+dummy=$(wait_for_window 'Applet Viewer' && :)
+applicationwindow=`DISPLAY=:1 wmctrl -l | grep 'Applet viewer' | cut -d' ' -f1`
+DISPLAY=:1 wmctrl -i -r $applicationwindow -b add,fullscreen
 
 echo "Loop to prevent container from exiting"
 echo "CTRL-C to exit or run 'docker stop <container>'"
