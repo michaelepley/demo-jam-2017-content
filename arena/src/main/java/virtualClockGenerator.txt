@@ -1,0 +1,50 @@
+JJRobots Arena Version 3.0beta (March 2002)
+------------------------------
+
+This latest version of the game actually brings a little revolution with it: in
+order to obtain faithful results of robot performance across a vast multitude
+of environments, OSes, Virtual Machines, CPUs, it was necessary to separate the
+time as seen by the robots (virtual time) from the time seen by the observer
+(real time), in order to provide constant CPU power per second to the robot
+threads.
+
+With this version, the simulation time (or virtual time) is calibrated around
+the speed of the machine it's running on by a special "benchmark" function; as
+a result, the *real* speed of the simulation now varies according to the speed
+of the CPU, JVM and OS.  So, you may notice an increase or decrease of the
+number of matches per hour of real time that can be played on your machine, but
+you can be (almost!) guaranteed that the performance of the robots tested and
+developed on your machine will be consistent across all the possible
+environments they could be executed on in the real tournament.  CPU contention
+due to other running programs will be gracefully accomodated, causing the
+simulation to slow down, rather than becoming "jumpy" as with earlier versions.
+
+A new option has been provided in the user interface: "Display", which can be
+set to "Smooth" (60 fps of real time), "Fast" (30 fps of *virtual* time) and
+"None", where the match is not shown but the clock counter is updated and the
+results are displayed; this setting can be easily changed even within a match.
+"None" corresponds most closely with the way actual tournament matches are
+executed, as well as being a bit faster.
+
+When watching a match, choose between Smooth and Fast, whichever looks best for
+you. While running extended tests, you might consider opting for "None" in
+order to get a higher number of matches played per hour.  Whatever you choose,
+unless you have a very fast machine you will notice a considerable slow down in
+Team play.  That is actually one of the biggest benefits of virtual time, as
+it's now granting a lot more CPU time to the robots, which can now make use of
+more advanced targeting techniques even in this previously CPU-constrained mode
+of play.  
+
+As a way to compensate to for the possible slow down / speed up of
+visualization, two new simulation speed settings have been provided: 8X and
+1/8X; however, keep in mind that changing the simulation speed actually changes
+the CPU time allocated to the robots, so in order to obtain the most faithful
+picture of your robot's performance, do intensive testings at the official
+speed of 1X.
+
+Finally, you should expect to see some changes to win rates, especially in Team
+mode where robots are now given more CPU time than they were previously.
+
+
+Alan Lund (alan.lund@acm.org)
+Walter Nistico' (walnist@infinito.it)

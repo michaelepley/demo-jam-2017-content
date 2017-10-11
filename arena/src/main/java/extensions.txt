@@ -1,0 +1,232 @@
+EXTENSIONS
+----------
+to the basic methods available for programming your jrobot.
+The basic methods are documented in the file jjr_info.html
+
+You must consider these methods experimental and this is the
+reason why they are not included in the basic HTML documentation.
+However, you must consider even that they are already available
+in the on-line arena (and in the off-line one) and it's very
+unlikely that someone is going to change something. So use them
+without too much worries.
+
+SUMMARY
+=======
+1.  JJVector class
+2.  JJRobot class (additions)
+2.1 additions by Christo Fogelberg (November 2001)
+2.2 additions by Alan Lund (February 2002)
+2.3 additions by Tim Strazny (February 2002)
+
+-----------------
+1. JJVector class 
+=================
+
+by Christo Fogelberg (doubtme@hotmail.com) (November 2001)
+--------------------
+additions by Alan Lund (alan.lund@acm.org) (February 2002)
+----------------------
+
+Function Reference:
+
+# Constructors:
+
+  JJVector()
+    - Initializes to x=0, y=0, t=1
+
+  JJVector(double x, double y)
+    - Initializes to x, y, t=1
+
+  JJVector(double x, double y, double t)
+    - Initializes to x, y, t
+
+  JJVector(JJVector v)
+    - Copy constructor
+
+# Factory methods:
+
+  static JJVector Polar(double r, double a)
+  static JJVector Polar(double r, double a, double t)
+    - Construct a vector using polar coordinates instead of cartesian.
+
+# Basic Mutators:
+
+  void set_x(double x)
+  void set_y(double y)
+  void set_t(double t)
+
+  void set  (double x, double y)
+  void set  (double x, double y, double t)
+  void set  (JJVector v)
+
+Using set(JJVector) is _not_ the same as using "=". For JJVectors a and b,
+  a = b;
+  a.set(b);
+do different things - in the first case a points to the same JJVector as b.
+In the second, the value of the JJVector pointed to by a is the same as that
+pointed to by b - so they can be changed independently.
+
+# Basic Maths Functions:
+  None of these affect the internal state of the vector that calls them.
+
+  public double x()     - returns the x component of the vector
+  public double y()     - returns the y component of the vector
+  public double t()     - returns the t component of the vector
+  public double mag()   - returns the magnitude of the vector
+  public double angle() - returns the angle of the vector
+
+  public double r()     - returns the r (polar) coordinate of the vector
+                          (same as mag())
+  public double a()     - returns the a (polar) coordinate of the vector
+                          (same as angle())
+
+  public double dot(JJVector v)
+    - returns this . v, i.e. the dot product of this and v.
+
+  public double speed()
+    - returns the speed (distance / time) represented by the vector;
+      that is, mag() / t().
+
+  public JJVector velocity()
+  public JJVector velocity(JJVector result)
+    - Computes the velocity vector, which is just the vector pointing
+      in the same direction as "this", but with both time and distance
+      scaled, such that result.t() == 1.  (See below for the
+      usefulness of the second form.)
+
+# Vector arithmetic:
+  There are two versions of each of these functions, the convenient
+  version and the potentially faster version.
+
+First the convenient ones...
+
+  public JJVector plus(JJVector v)
+    - Adds "this" and "v" and returns the result
+
+  public JJVector minus(JJVector v)
+    - Subtracts "v" from "this" and returns the result
+
+  public JJVector mult(double d)
+    - Multiples" this" by "d" and returns the result
+
+  public JJVector rotate(double a)
+    - Rotates this by "a" degrees and returns the result
+
+Note that the time component _is_ affected by all but rotate().
+
+The following maths functions are designed slightly differently.
+The returned JJVector is a reference to the result argument.
+This avoids doing lots of ugly construction outside the control
+of the caller - instead, they can construct temporarys as and
+when necessary, while still chaining ops together.
+
+  public JJVector plus(JJVector v, JJVector result)
+    - sums "this" and "v" and returns the result.
+
+  public JJVector minus(JJVector v, JJVector result)
+    - returns "this" - "v"
+
+  public JJVector mult(double d, JJVector result)
+    - multiples "this" by the scalar "d" and returns the result
+
+  public JJVector rotate(double a, JJVector result)
+    - Rotates this by "a" degrees and returns the result
+    
+# Helpful Functions: 
+  Pretty much the ones I found I needed when I didn't want to do a
+  whole bunch of calculating in my code.
+  Feel free to request new ones.
+
+  public double dist(JJVector v)
+    - returns the distance beteween the two vectors. Will always be
+      positive.  Same as minus(v).mag().
+
+  public JJVector unit()
+  public JJVector unit(JJVector result)
+    - returns the "unit-ised" vector of this.  This function works in 
+      the same way as plus, minus and mult.
+
+Sample Use:
+
+Here is a function that calculates the estimated future position of a
+target using a prior location (and time) and a current location (and
+time), as well as the amount of time to predict into the future,
+assuming simple target leading.
+
+  private JJVector lead(JJVector lastPosition,
+                        JJVector newPosition,
+                        double   timeFromNow)
+  {
+    JJVector velocity = newPosition.minus(lastPosition).velocity();
+    return newPosition.plus(velocity.mult(timeFromNow));
+  }
+
+The estimated missile flight time might be
+  
+  JJVector myLocation     = ...
+  JJVector targetLocation = ...
+  double   flightTime     = myLocation.dist(targetLocation) / 300.0;
+
+
+-----------------
+2. JJRobots class (additions)
+=================
+
+2.1 by Christo Fogelberg (doubtme@hotmail.com) (November 2001)
+------------------------
+
+double rad2deg(double val)  - converts val radians to an equivalent value
+                              between 0 and 360, measured in degrees.
+double d_abs(double val)    - returns the absolute value of val.
+double d_rnd(double val)    - returns val, as a double.
+int    i_rnd(double val)    - returns val, as an integer.
+
+
+2.2 by Alan Lund (alan.lund@acm.org) (February 2002)
+----------------
+
+double d_loc_x()    - returns the x location of the robot as a double
+double d_loc_y()    - returns the x location of the robot as a double
+  - more precise than the older integer methods loc_x and loc_y 
+
+int cannon(JJVector v)
+  - v gives direction and distance
+  - returns 1 if the cannon shot, 0 otherwise
+
+JJVector vscan(int degree, int resolution)
+  - arguments work as in usual scan method
+  - returns the relative position as a JJVector
+
+void drive(JJVector v)
+  - v gives direction and REAL speed (0 to 30 in virtual m/s)
+
+double actual_speed()
+  - returns the real speed (0 to 30 in virtual m/s) as double
+
+double heading()
+  - returns the robot's current direction in radians
+
+JJVector velocity()
+  - returns the robot's current direction and REAL speed
+
+JJVector location()
+  - returns the robot's current location and the current time
+
+
+2.3 by Tim Strazny (timstrazny@gmx.de) (February 2002)
+------------------
+
+double exp(double value)  - returns the exp
+double log(double value)  - returns the log
+
+
+2.3 by Leonardo Boselli (boselli@uno.it) (March 2002)
+-----------------------
+
+int getFriendsCount()  - returns the number of team mates
+  - gives 1 for SINGLE, 2 for DOUBLE, 8 for TEAM
+  - doesn't report the number of mates still active (!)
+
+
+---
+END of EXTENSIONS

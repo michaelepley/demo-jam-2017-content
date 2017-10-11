@@ -1,0 +1,138 @@
+Sources of the Caos' Advanced Arena
+
+18/07/2004
+
+New function in Robot´s selection list
+	Now you can select a sub-group of robots to figth among them, excluding the robots that are not selected. It's quite bothering to modify the Robots.txt file each time you want to create a reduced set of robots.
+	If you select less, or the same amount of, robots than needed by the game mode, they are always selected, and the rest (if needed) of the oponents are selected automatically. It's like ever...
+	If you select more robots than needed, they are consider the new universe of robots to be considered by the selection algorithm.
+
+Change of the order of the objects in the control panel
+	Items regrouped by function
+		The controls are regrouped in three categories: Options, Show and Match, and they are redistributed over the screen to organize them and optimize the space.
+
+Save & Close button panel modified
+	Disabled buttons
+		Save and Close buttons are enabled or disabled when the Arena runs as Applet or Application, but they are always visible, mantaining a consistent interfase.
+	Save button function
+		It saves the Robots.txt file in the same order than readed. It was necessary to maintain referencial integrity (positional) with robot´s numbers in Combats.txt file
+		Now, it is possible to collect data about each combat, and you can save it in a file called Combats.txt
+		I chose to include some data that in general I use to obtain some statistics while debugging my robot. Other information could be interesting, specially when the Arena runs in different kind of machines.
+		The file generated is compatible with de Watch program, but it adds more information.
+		Fields are tab separated, and the current list is:
+			Watch: Data used by the Watch program
+			LTime: Local date and time of the combat
+			TimeZone: Time zone of the system (to calculate the GMT time of the combat)
+			Country: Country of the system
+			IP: IP address (it could work despite the security restrictions of the browser...)
+			OS: Operating system
+			JVersion: JVM version
+			Program: "P" if its running as application, or "A" if it's an Applet
+			Mode: Game mode played
+			Result: "W" if there was a winner, and "D" if it was a Draw
+			Duration: Time wasted by the combat
+			IDist: Initial distance between the opponentes (by now, it just works fine in Single mode)
+			FDist: Final distance among the opponentes when the game ended (by now, it just works fine in Single mode)
+			Winner: The name of the winner robot (or team) (to avoid reading the Robots.txt in order to get the name)
+			Winer%: The percentage of damage of the winner robot (or team)
+			Loser<n>: The name of the loser robot (or team)
+			Loser<n>%: The percentage of damage of the loser robot (or team)
+		Some more specific information about the machine could be included, but it seems to be necesary to include some security (signing) to the applet, in order to obtain them from a browser.
+		I think it could be interesting to work in this direction...
+
+	Clear button added
+		It's a little bothering to modify the Robots.txt file each time you want to clear the statistics, so the new button resets the data collected (or readed from the files).
+		The button doesn't modify the file, just clear the data in memory. If you want to reset the files, you should use Clear, and then Save...
+		Now, it is possible to collect data about each combat, so it's important to mantain the integrity between the information in the Robots.txt and the new Combats.txt file, so this button acts over both sources of information.
+
+Changes in "Time" control
+	I changed the name of the control by Clock (I think it's more representative)
+	Control type changed: Buttons by Combo. It needs less visual space, and the programming is simplified.
+	The 1x speed is renamed as Official, to reference the speed that is used in the official online challenges.
+
+Changes in "Display" control
+	Control type changed: Radios by Combo, because it needs less visual space.
+	A new speed (Fastest) is added: Sometimes when you are debbuging specific things, you need just a visual feedback, and not to watch the details of the game (first seconds in Team mode, movements analysis , etc)
+	Some internal changes were made to simplify the logic and to allow incorporate new speeds if it were necesary. (I thought to allow the input of the fps directly, but I thought it could be less friendly...)
+
+Changes in "Select" control
+	Control type changed: Radios by Combo, because it needs less visual space.
+
+SSDist added (Single Start Distance)
+	You can type a value between 0 and 1000, so at the beginning of the battle, the program will select a pair of random position, with the chosen distance.
+	If the field is clear, the beahvior is like usual (random distance).
+	Complex robots use different tactics, (in general) depending on the distance to the opponent.
+	When you are debugging the implementation of these tactics, it's very useful to set the initial distance of the robots.
+	Really it works just in Single mode, but the improvements achived using this tool, will affect the behavior of the robots in every mode...
+
+Button Resume eliminated
+	The Play button, now works like the Play/Pause button of standard electronic devices.
+	It needs less visual space, ... and I think it's more intuitive.
+
+Play mode selection changed
+	Buttons were changed by Checkboxs, in order to achieve the following behavior:
+	Now you can select any combination of playing modes, and test your robot in batch, but just in the modes you have selected.
+	When you press Play, the program select the mode with a random algorithm, but just among those modes selected.
+
+Show checkboxes
+	Results windows changed
+		It's just a minor change. It's a little difficult to identify the separation among the percentages of the different modes, so I've just added some more spaces, and a bigger X beetwen groups of results...
+	Combats added
+		A new window with historical information about each combat is added.
+		It's compatible with the Watch program, but it has some aditional data related with the combat (and the system).
+		Above is a more detailed description of the format of this file.
+	Skin added
+		I thought it could be funny to incorporate some new (and ... very basic) visual characteristics, specially thinking in the new, or casual people...
+		Background image: if the checkbox is selected, the Arena uses a background image, loaded and scaled from the background.jpg file.
+		So you can change the image in your computer to have your own representation of the Arena, ... and the online arena could use a customized image according to the theme of the current challenge ;-)
+
+		Visual representation of the robots: Each robot can use the added method Image to load the "drawing" of itself. Perhaps in the future we could recognize the robots by its shape...
+		I use Polygons to implement it, because it was easy to rotate and scale them without using special features of Java or complex algorithms.
+		For instance, you can add the next sentences in your robot to give "personality" to your robot:
+
+			int x[] = {1, 10, 1};
+			int y[] = {1, 5, 10};
+			image(x,y);
+
+		In the previous example, your robot will be represented by a triangle, whose sides are defined by the points in the arrays x and y.
+		The Polygons are automatically scaled to a common size (10), and filled with the color that represent each team in the Arena.
+		To limit the complexity of the repetitive calculations, the max amount of points allowed is 20, ... and of course the min is 3.
+		While you don't call the image method, the Arena will use a colored circle to represent the robot.
+
+	Debug added
+		Besides the information collected at the end of each combat, to debug a robot it's very useful to represent graphically some calculated variables (speed, direction, estimations, etc) at the moment, and in the place where they happen over the Arena.
+		Alan has developed this point in an old message in the group discussion...
+		If the checkbox is selected, the Arena calls the method "debug" that should be implemented inside the robot in order to get the control when the Arena is updating the screen.
+		The new method has the needed parameters to draw shapes over the Arena.
+		For instance, you could draw a small (2) circle in a estimated position x,y inside the Arena in this way:
+
+			import java.awt.Graphics
+			...
+			public void debug(Graphics g, double cte, int offX, int offY)
+			{
+				g.fillOval(x*cte+offX, y*cte+offY,2,2);
+			}
+
+		Of course, to do that, you will need to use classes forbidden in the online challenges, so you must eliminate them before uploading your robot to the online Arena, otherwise your upload will be denied!
+		If you don't implement this method, the Arena does nothing when you select the debug checkbox.
+
+A minor bug fixed
+	Missiles fired at 0 distance (by error...or depression ;-)), generated missed missiles. Now, it works fine...
+
+Arena frame's changes
+	Some changes aimed to improve the visibility of the details when you are debugging
+	Main title of the arena changed
+		It shows who is playing, and the game´s mode selected. It's useful when the game is playing with no display.
+	Track lines are colored with the robot's color
+		It's easier to verify the route followed by yours robots, specially in Team mode.
+	The name is eliminated of each robot, and now they can be identified by its colors (or shape).
+		The goal was eliminate unneeded information over the Arena, to allow a better visibility of the game.
+		Since all the robots of the each team share the color, and there is a colored text panel with the names of the teams, the name was redundant.
+	The damage and text information are colored with the specific color of the robot
+		Since the robots doesn't "carry" the name with them, they are recognized by their colors and colored text panel.
+	The damage bar is shorter
+		It's to improve visibility, but yet maintaining this friendly way of showing the damage.
+	A background image is scaled and displayed if Skin is selected
+		As discussed before, you can add a backgroung image to represent the Arena.
+	A graphical representation of the robot is available through the new method Image
+		As discussed before, you can add a polygonal image to represent the robots.
