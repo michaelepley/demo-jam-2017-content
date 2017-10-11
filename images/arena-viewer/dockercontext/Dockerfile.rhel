@@ -8,12 +8,11 @@ LABEL description="JRobots Arena Viewer"
 ENV WMCTRL_RPM=wmctrl-1.07-15.el7.nux.x86_64.rpm
 
 WORKDIR /tmp/
-ADD setup-subscription.sh /tmp/
 ADD resources/ resources/
 
 # setup subscription and then required packages
 USER 0
-RUN /tmp/setup-subscription.sh
+RUN /resources/setup-subscription.sh
 
 # install the required packages and other components
 RUN yum clean all && yum install -y deltarpm && yum clean all \
