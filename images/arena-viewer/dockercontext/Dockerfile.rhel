@@ -1,0 +1,20 @@
+FROM rhel:7
+
+MAINTAINER Michael Epley <mepley@redhat.com>
+
+LABEL vendor="Red Hat"
+LABEL version="0.1"
+LABEL description="JRobots Arena Viewer"
+ENV WMCTRL_RPM=wmctrl-1.07-15.el7.nux.x86_64.rpm
+
+RUN yum clean all && yum install -y deltarpm && yum clean all \
+    && yum -y install tigervnc-server gtk2 java-1.8.0-openjdk-devel liberation-fonts-common liberation-sans-fonts libguac-client-vnc guacd openbox guacamole \
+    && yum clean all
+# install wmctrl since not in EPEL or standard channels
+RUN curl ftp://ftp.pbone.net/mirror/li.nux.ro/download/nux/dextop/el7/x86_64/$WMCTRL_RPM -o resources/$WMCTRL_RPM \
+    && yum -y localinstall resources/$WMCTRL_RPM \
+    && systemctl disable tomcat && systemctl disable guacd \
+    && cp resources/user-mapping.xml /etc/guacamole 
+# make sure that tomcat and guacd do not auto-start at boot
+
+# update the user-mapping.xml file for guacamole
