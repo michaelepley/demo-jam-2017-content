@@ -25,4 +25,5 @@ RUN yum install -y yum-utils && yum clean all \
 RUN curl ftp://ftp.pbone.net/mirror/li.nux.ro/download/nux/dextop/el7/x86_64/$WMCTRL_RPM -o /tmp/$WMCTRL_RPM \
     && yum -y localinstall /tmp/$WMCTRL_RPM \
     && systemctl disable tomcat && systemctl disable guacd \
+    && mkdir -p /etc/guacamole
     && cp /resources/user-mapping.xml /etc/guacamole 
